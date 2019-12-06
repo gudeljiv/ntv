@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test 03</title>
+        <style>
+            * {
+                font-family: Arial;
+                box-sizing: border-box;
+            }
+            .page-wrapper {
+                max-width: 1280px;
+                margin: auto;
+            }
+            header,
+            footer,
+            .content {
+                overflow: auto;
+            }
+            .main,
+            .extras {
+                float: left;
+                padding: 8px;
+            }
+            .main {
+                width: 100%;
+            }
+
+            .hidden {
+                display: none;
+            }
+            #myImageElementInTheDom {
+                width: 640px;
+                height: 640px;
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            #myImageElementInTheDom div {
+                width: 25%;
+                height: 25%;
+            }
+            #myImageElementInTheDom div img {
+                width: 100%;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+        <script>
+            $(function() {
+                let image = new Image()
+
+                $('#images').on('change', () => {
+                    $('#myImageElementInTheDom').html('')
+                    image.onload = function() {
+                        cutImageUp(image)
+                    }
+                    image.src = 'img/' + $('#images').val()
+                })
+
+                function cutImageUp(image) {
+                    console.log(image)
+                    let imagePieces = []
+                    let rows = 4
+                    let columns = 4
+                    let widthOfOnePiece = image.width / columns
+                    let heightOfOnePiece = image.height / rows
+                    for (var x = 0; x < columns; ++x) {
+                        for (var y = 0; y < rows; ++y) {
+                            let canvas = document.createElement('canvas')
+                            canvas.width = widthOfOnePiece
+                            canvas.height = heightOfOnePiece
+                            let context = canvas.getContext('2d')
+                            context.drawImage(
+                                image,
+                                y * widthOfOnePiece,
+                                x * heightOfOnePiece,
+                                widthOfOnePiece,
+                                heightOfOnePiece,
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            )
+                            imagePieces.push(canvas.toDataURL())
+                        }
+                    }
+
+                    $.each(imagePieces, (key, value) => {
+                        let item = "<div draggable='true' class='image_" + key + "'><img src='" + value + "'></div>"
+                        $('#myImageElementInTheDom').append(item)
+                    })
+                }
+
+                $.get('puzzle.php', function(response) {
+                    let res = JSON.parse(response)
+                    $.each(res, (key, item) => {
+                        $('#images').append(
+                            $('<option>', {
+                                value: item.image,
+                                text: item.title,
+                            })
+                        )
+                    })
+
+                    image.onload = function() {
+                        cutImageUp(image)
+                    }
+                    image.src = 'img/' + res[0].image
+                })
+                    .done(function(res) {})
+                    .fail(function() {})
+            })
+        </script>
+    </head>
+    <body>
+        <div class="page-wrapper">
+            <header>
+                <h1>Page header</h1>
+            </header>
+            <div class="content">
+                <div class="main">
+                    <div><select id="images"></select></div>
+                    <p></p>
+                    <div id="myImageElementInTheDom"></div>
+                </div>
+            </div>
+            <footer>
+                <hr />
+                Page footer
+            </footer>
+        </div>
+    </body>
+</html>

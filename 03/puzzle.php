@@ -1,5 +1,7 @@
 <?php
 
+$puzzles = getPuzzleImages();
+echo json_encode($puzzles, JSON_NUMERIC_CHECK);
 
 /*
 * Returns list of available puzzle images
