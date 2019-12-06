@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test 01</title>
+        <style>
+            * {
+                font-family: Arial;
+                box-sizing: border-box;
+            }
+            .page-wrapper {
+                max-width: 1280px;
+                margin: auto;
+            }
+            header,
+            footer,
+            .content {
+                overflow: auto;
+            }
+            .main,
+            .extras {
+                /* float: left; */
+                padding: 8px;
+                text-align: center;
+            }
+            .main {
+                width: 100%;
+            }
+            .extras {
+                width: 33.333%;
+                clear: right;
+            }
+            .hidden {
+                display: none;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <link
+            rel="stylesheet"
+            href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+        />
+
+        <script>
+            $(function() {
+                $('#datepicker').datepicker()
+
+                $('#datepicker').change(function() {
+                    $(this).datepicker('option', 'dateFormat', 'yymmdd')
+                    // console.log($(this).val())
+                    getdata($(this).val())
+                })
+            })
+
+            // let excluded = localStorage.getItem('quotes')
+            // let d = '2018-08-09'
+
+            getdata('20180809')
+
+            function color(red, blue) {
+                let r = 0
+                let g = 0
+                let b = 0
+
+                r = Math.round((red / 100) * 204)
+                b = Math.round((blue / 100) * 204)
+
+                // console.log(red, r, blue, b)
+
+                var hex = r * 0x10000 + g * 0x100 + b * 0x1
+                return '#' + ('000000' + hex.toString(16)).slice(-6)
+            }
+
+            function getdata(date) {
+                $.get('data.php?d=' + date, response => {
+                    let d,
+                        path,
+                        svg = document.getElementById('svg'),
+                        ns = 'http://www.w3.org/2000/svg'
+                    let res = JSON.parse(response)
+
+                    if (res.data.length > 0) {
+                        $('#svg').show()
+                        $('.datum').show()
+                        $('.datum > span').html(res.date)
+                        $('.nodata').hide()
+                        $.each(res.data, (key, value) => {
+                            fill = color(value.red, value.blue)
+                            // console.log(value.red, value.blue, fill)
+                            path = document.createElementNS(ns, 'path')
+                            path.setAttribute('d', value.svg_path)
+                            path.setAttribute('id', 'svg_' + value.county_id)
+                            path.setAttribute('stroke-width', '1')
+                            path.setAttribute('stroke', '#000000')
+                            path.setAttribute('fill', fill)
+                            svg.appendChild(path)
+                        })
+                    } else {
+                        $('#svg').hide()
+                        $('.datum').hide()
+                        $('.nodata').show()
+                        $('.nodata > span').html(res.date)
+                    }
+
+                    // console.log(res)
+                })
+                    .done(function(res) {})
+                    .fail(function() {
+                        $('#svg').hide()
+                        $('.datum').hide()
+                        $('.nodata').show()
+                        $('.nodata > span').html('Datum nije ispravnog formata')
+                    })
+            }
+        </script>
+    </head>
+    <body>
+        <div class="page-wrapper">
+            <header>
+                <h1>Page header</h1>
+            </header>
+            <p>
+                Date: <input type="text" id="datepicker" autocomplete="off" />
+            </p>
+            <div class="content">
+                <div class="main">
+                    <h2 class="datum">Podaci za: <span></span></h2>
+                    <h2 class="nodata">Nema podataka za: <span></span></h2>
+                    <svg
+                        id="svg"
+                        width="640"
+                        height="640"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 640 640"
+                    ></svg>
+                </div>
+            </div>
+            <footer>
+                <hr />
+                Page footer
+            </footer>
+        </div>
+    </body>
+</html>
