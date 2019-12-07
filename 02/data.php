@@ -1,8 +1,8 @@
 <?php
 
 $dsn = "mysql:host=mariadb;dbname=ntv";
-$user = "root";
-$passwd = "borming";
+$user = "user";
+$passwd = "pass";
 $pdo = new PDO($dsn, $user, $passwd, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8") );
 
 $date = (isset($_GET["d"]) && validateDate($_GET["d"])) ? $_GET["d"] : date("Y-m-d");
