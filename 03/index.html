@@ -33,14 +33,30 @@
                 height: 640px;
                 display: flex;
                 flex-wrap: wrap;
+                /* background-position: center;
+                background-size: cover; */
             }
 
             #myImageElementInTheDom div {
                 width: 25%;
                 height: 25%;
             }
+
             #myImageElementInTheDom div img {
-                width: 100%;
+                width: calc(100% - 1px);
+                height: calc(100% - 1px);
+                border: 1px solid black;
+            }
+            .nav {
+                display: flex;
+            }
+
+            .nav :first-child {
+                margin-right: 20px;
+            }
+
+            .moveable {
+                cursor: pointer;
             }
         </style>
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -48,6 +64,10 @@
         <script>
             $(function() {
                 let image = new Image()
+                let key = '0123456789101112131415'
+                let empty = 15
+                let moveables = [11, 14]
+                let tiles = $('#myImageElementInTheDom')
 
                 $('#images').on('change', () => {
                     $('#myImageElementInTheDom').html('')
@@ -57,38 +77,95 @@
                     image.src = 'img/' + $('#images').val()
                 })
 
+                $('#shuffle').on('click', () => {
+                    shuffle()
+                })
+
+                $(document).on('click', '.moveable', async function(ev) {
+                    // let temp = document.getElementById('empty')
+                    // ev.currentTarget.parentNode.replaceChild(ev.currentTarget, document.getElementById('empty'))
+                    // ev.currentTarget.parentNode.insertBefore(temp, ev.currentTarget)
+
+                    var copy_to = $(document.getElementById('empty')).clone(true)
+                    var copy_from = $(ev.currentTarget).clone(true)
+
+                    $(document.getElementById('empty')).replaceWith(copy_from)
+                    await $(ev.currentTarget)
+                        .replaceWith(copy_to)
+                        .promise()
+                    calc()
+                })
+
                 function cutImageUp(image) {
-                    console.log(image)
                     let imagePieces = []
                     let rows = 4
                     let columns = 4
-                    let widthOfOnePiece = image.width / columns
-                    let heightOfOnePiece = image.height / rows
+                    let tile_width = image.width / columns
+                    let tile_height = image.height / rows
                     for (var x = 0; x < columns; ++x) {
                         for (var y = 0; y < rows; ++y) {
                             let canvas = document.createElement('canvas')
-                            canvas.width = widthOfOnePiece
-                            canvas.height = heightOfOnePiece
+                            canvas.width = tile_width
+                            canvas.height = tile_height
                             let context = canvas.getContext('2d')
-                            context.drawImage(
-                                image,
-                                y * widthOfOnePiece,
-                                x * heightOfOnePiece,
-                                widthOfOnePiece,
-                                heightOfOnePiece,
-                                0,
-                                0,
-                                canvas.width,
-                                canvas.height
-                            )
+                            context.drawImage(image, y * tile_width, x * tile_height, tile_width, tile_height, 0, 0, canvas.width, canvas.height)
                             imagePieces.push(canvas.toDataURL())
                         }
                     }
 
+                    let count = 0
                     $.each(imagePieces, (key, value) => {
-                        let item = "<div draggable='true' class='image_" + key + "'><img src='" + value + "'></div>"
+                        count++
+                        let item
+                        if (count < 16) {
+                            item = "<div id='image" + key + "' data-image = '" + key + "'><img src='" + value + "'></div>"
+                        } else {
+                            item = "<div id='empty' class='empty' data-image = '" + key + "'></div>"
+                        }
                         $('#myImageElementInTheDom').append(item)
                     })
+                }
+
+                function shuffle() {
+                    let elems = tiles.children()
+
+                    elems.sort(function() {
+                        return Math.round(Math.random()) - 0.5
+                    })
+
+                    tiles.html('')
+                    for (var i = 0; i < elems.length; i++) tiles.append(elems[i])
+                    calc()
+                }
+
+                function calc() {
+                    let elems = tiles.children()
+                    let phrase = ''
+
+                    for (var i = 0; i < elems.length; i++) {
+                        $(elems[i]).removeClass('moveable')
+                        if ($(elems[i]).hasClass('empty')) empty = i
+                        phrase += $(elems[i]).data('image')
+                        // console.log($(elems[i]).data('image'))
+                    }
+
+                    moveables = []
+                    moveables.push(empty - 4)
+                    moveables.push(empty + 4)
+                    if (Math.floor(empty / 4) === Math.floor((empty - 1) / 4)) moveables.push(empty - 1)
+                    if (Math.floor(empty / 4) === Math.floor((empty + 1) / 4)) moveables.push(empty + 1)
+
+                    $.each(moveables, (key, item) => {
+                        $(elems[item]).addClass('moveable')
+                    })
+
+                    if (key === phrase) {
+                        alert('Slagalica složena')
+                        $('#myImageElementInTheDom div').removeClass('moveable')
+                    }
+
+                    // console.log('empty pos: ', empty, moveables, phrase)
+                    // console.log(key, phrase, key === phrase)
                 }
 
                 $.get('puzzle.php', function(response) {
@@ -119,7 +196,10 @@
             </header>
             <div class="content">
                 <div class="main">
-                    <div><select id="images"></select></div>
+                    <div class="nav">
+                        <div><select id="images"></select></div>
+                        <div><button id="shuffle">shuffle</button></div>
+                    </div>
                     <p></p>
                     <div id="myImageElementInTheDom"></div>
                 </div>
