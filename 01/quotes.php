@@ -2,12 +2,9 @@
 
 // insert code here
 
-
 $quotes = getAllQuotes();
 
-
 if(isset($_GET["excluded"]) && $_GET["excluded"] !== "null") foreach(explode(",", $_GET["excluded"]) as $exc) unset($quotes[$exc]);
-
 foreach($quotes as $key=>&$quote) $quote["id"] = $key;
 
 if($quotes){
@@ -16,7 +13,6 @@ if($quotes){
 	header("HTTP/1.0 400 Bad Request");
 	exit;
 }
-
 
 /*
 * Function returns list of available quotes

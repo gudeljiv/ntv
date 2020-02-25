@@ -86,8 +86,8 @@
                     // ev.currentTarget.parentNode.replaceChild(ev.currentTarget, document.getElementById('empty'))
                     // ev.currentTarget.parentNode.insertBefore(temp, ev.currentTarget)
 
-                    var copy_to = $(document.getElementById('empty')).clone(true)
-                    var copy_from = $(ev.currentTarget).clone(true)
+                    const copy_to = $(document.getElementById('empty')).clone(true)
+                    const copy_from = $(ev.currentTarget).clone(true);
 
                     $(document.getElementById('empty')).replaceWith(copy_from)
                     await $(ev.currentTarget)
@@ -102,8 +102,8 @@
                     let columns = 4
                     let tile_width = image.width / columns
                     let tile_height = image.height / rows
-                    for (var x = 0; x < columns; ++x) {
-                        for (var y = 0; y < rows; ++y) {
+                    for (let x = 0; x < columns; ++x) {
+                        for (let y = 0; y < rows; ++y) {
                             let canvas = document.createElement('canvas')
                             canvas.width = tile_width
                             canvas.height = tile_height
@@ -134,7 +134,7 @@
                     })
 
                     tiles.html('')
-                    for (var i = 0; i < elems.length; i++) tiles.append(elems[i])
+                    for (let i = 0; i < elems.length; i++) tiles.append(elems[i])
                     calc()
                 }
 
@@ -142,7 +142,7 @@
                     let elems = tiles.children()
                     let phrase = ''
 
-                    for (var i = 0; i < elems.length; i++) {
+                    for (let i = 0; i < elems.length; i++) {
                         $(elems[i]).removeClass('moveable')
                         if ($(elems[i]).hasClass('empty')) empty = i
                         phrase += $(elems[i]).data('image')
